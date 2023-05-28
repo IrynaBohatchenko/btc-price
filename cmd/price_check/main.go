@@ -6,6 +6,7 @@ import (
 	"github.com/btc-price/cmd/price_check/handler"
 	"github.com/btc-price/internal/btcpriceservice"
 	"github.com/btc-price/internal/coingeckoclient"
+	"github.com/btc-price/internal/emailsender"
 	"github.com/btc-price/internal/emailstorage"
 	"github.com/caarlos0/env/v6"
 	"net/http"
@@ -31,7 +32,7 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	btcPriceSrv := btcpriceservice.NewService(coingeckoclient.NewClient(), emailstorage.NewStorage())
+	btcPriceSrv := btcpriceservice.NewService(coingeckoclient.NewClient(), emailstorage.NewStorage(), emailsender.NewSender())
 
 	btcPriceHndlr := handler.NewBtcPrice(
 		btcPriceSrv,

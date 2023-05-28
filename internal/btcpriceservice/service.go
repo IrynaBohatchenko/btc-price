@@ -24,12 +24,12 @@ type (
 	}
 
 	EmailSender interface {
-		SendEmails(ctx context.Context) error
+		SendEmails(ctx context.Context, emailsList []btcpricelb.Email) error
 	}
 )
 
-func NewService(coingecko CoingeckoClient, emailStorage EmailStorage) *Service {
-	return &Service{coingecko: coingecko, emailStorage: emailStorage}
+func NewService(coingecko CoingeckoClient, emailStorage EmailStorage, emailSender EmailSender) *Service {
+	return &Service{coingecko: coingecko, emailStorage: emailStorage, emailSender: emailSender}
 }
 
 func (s *Service) HandleRate(ctx context.Context) (btcpricelb.RateResponse, error) {
@@ -54,7 +54,11 @@ func (s *Service) HandleSubscribe(ctx context.Context, email string) error {
 }
 
 func (s *Service) HandleSendEmails(ctx context.Context) error {
-	if err := s.emailSender.SendEmails(ctx); err != nil {
+	list, err := s.emailStorage.ReadAllEmails(ctx)
+	if err != nil {
+		return err
+	}
+	if err := s.emailSender.SendEmails(ctx, list); err != nil {
 		return err
 	}
 
